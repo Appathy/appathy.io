@@ -2,27 +2,22 @@ version: 2
 jobs:
   build:
     docker:
-      - image: circleci/node:7.10-browsers
+      - image: circleci/node:4.8.2
     steps:
       - checkout
       - run:
-          name: update npm
-          command: sudo npm install -g npm@7.10
-      - restore_cache
+          name: update-npm
+          command: 'sudo npm install -g npm@latest'
+      - restore_cache:
           key: dependency-cache-{{ checksum "package.json" }}
-      - run
-          name: install npm
+      - run:
+          name: install-npm
           command: npm install
       - save_cache:
           key: dependency-cache-{{ checksum "package.json" }}
           paths:
-            - node_modules
-    test:
-      docker:
-        - image: circleci/node:7.10-browsers
-      steps:
-        - checkout
-        - run:
+            - ./node_modules
+      - run:
           name: test
           command: npm test
 workflows:
@@ -30,9 +25,6 @@ workflows:
   build_and_test:
     jobs:
       - build
-      - test
-         requires:
-          - build
         filters:
           branches:
             only: deploy
